@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cms.wakaranai</title>
+  <meta name="description"
+    content="A curated gallery of commissioned art and illustrations from talented artists around the world.">
+  <meta name="theme-color" content="#161722">
+
+  <!-- Google Fonts — Outfit (EN), Prompt (TH), Noto Sans JP (JP) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- ========== Navigation ========== -->
+  <nav class="navbar" id="navbar">
+    <a href="#" class="nav-brand">cms<span>.</span>wakaranai</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="https://www.instagram.com/cms.wakaranai/">Instagram</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <!-- Sun icon for dark mode (to switch to light) -->
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <!-- Moon icon for light mode (to switch to dark) -->
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========== Hero Section ========== -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <span class="hero-label">✦ Commissioned Works</span>
+      <h1>A Collection of Art I've Brought to Life</h1>
+      <p>
+        Pieces I've commissioned from incredible artists, each one a collaboration turned into something beautiful.
+      </p>
+      <button class="hero-cta" onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})">
+        View the Gallery
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M12 5v14M5 12l7 7 7-7" />
+        </svg>
+      </button>
+    </div>
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <div class="line"></div>
+    </div>
+  </section>
+
+  <!-- ========== Gallery Section ========== -->
+  <section class="section" id="gallery">
+    <div class="section-header fade-in">
+      <h2>The Gallery</h2>
+      <p>Every piece tells a story, browse the collection below.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar fade-in" id="filterBar">
+      <!-- Dynamically populated by JS -->
+    </div>
+
+    <!-- Gallery grid -->
+    <div class="gallery-grid" id="galleryGrid">
+      <!-- Skeleton Loading State -->
+      <div class="gallery-item skeleton" style="height: 300px;"></div>
+      <div class="gallery-item skeleton" style="height: 450px;"></div>
+      <div class="gallery-item skeleton" style="height: 250px;"></div>
+      <div class="gallery-item skeleton" style="height: 350px;"></div>
+      <div class="gallery-item skeleton" style="height: 400px;"></div>
+      <div class="gallery-item skeleton" style="height: 300px;"></div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination fade-in" id="pagination">
+      <!-- Dynamically populated by JS -->
+    </div>
+  </section>
+
+  <!-- ========== About Section ========== -->
+  <section class="section" id="about">
+    <div class="section-header fade-in">
+      <h2>About This Collection</h2>
+      <p>The story behind the commissions.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="about-content fade-in">
+      <div class="about-visual"><img src="https://i.ibb.co/1tXDPBxf/first-oc.png" alt="Profile"></div>
+      <div class="about-text">
+        <h3>Why do I create this site?</h3>
+        <p>
+          I love backing artists and turning ideas into real things through teamwork. Each piece in this gallery is a
+          vision I dreamed up and an artist who made it happen. From character sketches to wide landscapes, every
+          commission feels like a fresh partnership.
+        </p>
+        <p>
+          This site is my way of showcasing their incredible work and sharing the results
+          of these creative journeys.
+        </p>
+        <div class="about-stats">
+          <div class="stat">
+            <div class="stat-number" id="statPieces">0</div>
+            <div class="stat-label">Pieces</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number" id="statArtists">0</div>
+            <div class="stat-label">Artists</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== Footer ========== -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; 2026 WakaranaiDesu - All artwork belongs to their
+        respective artists.</p>
+      <div class="footer-links">
+        <a href="#hero">Back to top</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== Lightbox ========== -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close lightbox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <div class="lightbox-content">
+      <button class="lightbox-nav prev" id="lightboxPrev" aria-label="Previous image">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <div class="lightbox-image-wrapper">
+        <img id="lightboxImg" src="" alt="">
+      </div>
+      <div class="lightbox-details">
+        <h2 id="lightboxTitle"></h2>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="lb-artist" id="lightboxArtist"
+          style="display: inline-block; text-underline-offset: 4px; color: var(--text-accent); transition: color 0.3s ease;"></a>
+        <div class="lb-description" id="lightboxDesc"></div>
+        <div class="lb-meta">
+          <div class="lb-meta-item">
+            <span class="label">Category</span>
+            <span class="value" id="lightboxCategory"></span>
+          </div>
+          <div class="lb-meta-item">
+            <span class="label">Date</span>
+            <span class="value" id="lightboxDate"></span>
+          </div>
+        </div>
+      </div>
+      <button class="lightbox-nav next" id="lightboxNext" aria-label="Next image">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+
+</html>
