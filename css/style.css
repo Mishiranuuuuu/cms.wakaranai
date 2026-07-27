@@ -654,8 +654,13 @@ img {
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Gallery Grid (Masonry) */
@@ -1204,6 +1209,62 @@ img {
 
   .section {
     padding: var(--gap-xl) 1.2rem;
+  }
+
+  /* Mobile Lightbox Layout */
+  .lightbox {
+    display: block;
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .lightbox-content {
+    display: block;
+    max-width: 100%;
+    max-height: none;
+    width: 100%;
+    padding: 3.5rem 0.75rem 1.5rem;
+    transform: none !important;
+  }
+
+  .lightbox.active .lightbox-content {
+    transform: none !important;
+  }
+
+  .lightbox-image-wrapper {
+    display: block;
+    max-width: 100%;
+    max-height: none;
+    width: 100%;
+    text-align: center;
+  }
+
+  .lightbox-image-wrapper img {
+    max-height: 50vh;
+    max-width: 100%;
+    width: auto;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .lightbox-details {
+    display: block;
+    width: 100%;
+    flex-shrink: unset;
+    padding: var(--gap-md);
+    margin-top: var(--gap-sm);
+  }
+
+  .lightbox-nav {
+    display: none;
+  }
+
+  .lightbox-close {
+    position: fixed;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 1001;
   }
 }
 
