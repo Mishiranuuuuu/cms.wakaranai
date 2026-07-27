@@ -423,7 +423,7 @@ async function pollForUpdates() {
 
     // Only update if data actually changed
     if (JSON.stringify(newArtworks) !== JSON.stringify(artworks)) {
-      console.log(`[Poll #${pollCount}] ✅ DATA CHANGED! Updating gallery...`);
+      console.log(`[Poll #${pollCount}] DATA CHANGED! Updating gallery...`);
       console.log(`   Old: ${artworks.length} items → New: ${newArtworks.length} items`);
       artworks = newArtworks;
       filteredArtworks = currentFilter === 'All'
