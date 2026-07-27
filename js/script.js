@@ -182,7 +182,7 @@ function updateLightboxContent() {
   lightboxImg.alt = `${art.title} by ${art.artist}`;
   lightboxTitle.textContent = art.title;
   lightboxArtist.textContent = `by ${art.artist}`;
-  
+
   if (art.artist_url) {
     lightboxArtist.href = art.artist_url;
     lightboxArtist.style.pointerEvents = 'auto';
@@ -192,7 +192,7 @@ function updateLightboxContent() {
     lightboxArtist.style.pointerEvents = 'none';
     lightboxArtist.style.textDecoration = 'none';
   }
-  
+
   lightboxDesc.textContent = art.description;
   lightboxCategory.textContent = art.category;
   lightboxDate.textContent = art.date;
@@ -369,6 +369,76 @@ async function init() {
   renderFilters();
   renderGallery();
   updateStats();
+
+  // Start polling for updates every 30 seconds
+  setInterval(pollForUpdates, 30000);
+}
+
+// Background poll — only re-renders if data changed
+let pollCount = 0;
+async function pollForUpdates() {
+  pollCount++;
+  const timestamp = new Date().toLocaleTimeString();
+  console.log(`[Poll #${pollCount}] Checking for updates... (${timestamp})`);
+
+  try {
+    const startTime = performance.now();
+    const response = await fetch(sheetUrl);
+    const fetchTime = (performance.now() - startTime).toFixed(0);
+    console.log(`[Poll #${pollCount}] Fetch completed in ${fetchTime}ms (status: ${response.status})`);
+
+    const text = await response.text();
+    const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+    const data = JSON.parse(jsonString);
+
+    const newArtworks = data.table.rows.map(row => {
+      let dateVal = '';
+      if (row.c[5]) {
+        const rawDate = row.c[5].v;
+        if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
+          const parts = rawDate.replace('Date(', '').replace(')', '').split(',');
+          if (parts.length >= 3) {
+            const y = parts[0];
+            const m = String(parseInt(parts[1]) + 1).padStart(2, '0');
+            const d = String(parts[2]).padStart(2, '0');
+            dateVal = `${d}/${m}/${y}`;
+          }
+        } else {
+          dateVal = row.c[5].f || row.c[5].v || '';
+        }
+      }
+      return {
+        id: row.c[0] ? row.c[0].v : '',
+        title: row.c[1] ? row.c[1].v : 'Untitled',
+        artist: row.c[2] ? row.c[2].v : 'Unknown',
+        image: row.c[3] ? row.c[3].v : '',
+        category: row.c[4] ? row.c[4].v : 'Other',
+        date: dateVal,
+        description: row.c[6] ? row.c[6].v : '',
+        artist_url: row.c[7] ? row.c[7].v : ''
+      };
+    });
+
+    console.log(`[Poll #${pollCount}] Fetched ${newArtworks.length} rows from sheet`);
+
+    // Only update if data actually changed
+    if (JSON.stringify(newArtworks) !== JSON.stringify(artworks)) {
+      console.log(`[Poll #${pollCount}] ✅ DATA CHANGED! Updating gallery...`);
+      console.log(`   Old: ${artworks.length} items → New: ${newArtworks.length} items`);
+      artworks = newArtworks;
+      filteredArtworks = currentFilter === 'All'
+        ? [...artworks]
+        : artworks.filter(a => a.category === currentFilter);
+      renderFilters();
+      renderGallery(currentFilter, currentPage);
+      updateStats();
+      console.log(`[Poll #${pollCount}] Gallery re-rendered successfully`);
+    } else {
+      console.log(`[Poll #${pollCount}] No changes detected`);
+    }
+  } catch (err) {
+    console.warn(`[Poll #${pollCount}] Error: ${err.message} — will retry in 30s`);
+  }
 }
 
 // Run on DOM ready
