@@ -1,3 +1,15 @@
+/* Column index constants */
+const COL = {
+  ID: 0,
+  TITLE: 1,
+  ARTIST: 2,
+  IMAGE: 3,
+  CATEGORY: 4,
+  DATE: 5,
+  DESCRIPTION: 6,
+  ARTIST_URL: 7
+};
+
 /* Artwork Data fetched from Google Sheets */
 let artworks = [];
 let currentFilter = 'All';
@@ -10,6 +22,40 @@ const itemsPerPage = 9;
 const sheetId = '1-Cj5ksHOIEcZLtuIY07wE2NXufshZNxU42jToMGI9Mo';
 const sheetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
 
+/* Shared sheet-row parser */
+function parseSheetRows(data) {
+  return data.table.rows.map(row => {
+    // Parse Google Sheets Date(YYYY,M,D) format to dd/mm/yyyy
+    let dateVal = '';
+    if (row.c[COL.DATE]) {
+      const rawDate = row.c[COL.DATE].v;
+      if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
+        const parts = rawDate.replace('Date(', '').replace(')', '').split(',');
+        if (parts.length >= 3) {
+          const y = parts[0];
+          const m = String(parseInt(parts[1]) + 1).padStart(2, '0');
+          const d = String(parts[2]).padStart(2, '0');
+          dateVal = `${d}/${m}/${y}`;
+        }
+      } else {
+        dateVal = row.c[COL.DATE].f || row.c[COL.DATE].v || '';
+      }
+    }
+
+    return {
+      id: row.c[COL.ID] ? row.c[COL.ID].v : '',
+      title: row.c[COL.TITLE] ? row.c[COL.TITLE].v : 'Untitled',
+      artist: row.c[COL.ARTIST] ? row.c[COL.ARTIST].v : 'Unknown',
+      image: row.c[COL.IMAGE] ? row.c[COL.IMAGE].v : '',
+      category: row.c[COL.CATEGORY] ? row.c[COL.CATEGORY].v : 'Other',
+      date: dateVal,
+      description: row.c[COL.DESCRIPTION] ? row.c[COL.DESCRIPTION].v : '',
+      artist_url: row.c[COL.ARTIST_URL] ? row.c[COL.ARTIST_URL].v : ''
+    };
+  });
+}
+
+/* Data fetching */
 async function fetchArtworks() {
   try {
     const response = await fetch(sheetUrl);
@@ -19,43 +65,50 @@ async function fetchArtworks() {
     const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
     const data = JSON.parse(jsonString);
 
-    // Map rows to our artwork object structure
-    artworks = data.table.rows.map(row => {
-      // Parse Google Sheets Date(YYYY,M,D) format to dd/mm/yyyy
-      let dateVal = '';
-      if (row.c[5]) {
-        const rawDate = row.c[5].v;
-        if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
-          const parts = rawDate.replace('Date(', '').replace(')', '').split(',');
-          if (parts.length >= 3) {
-            const y = parts[0];
-            const m = String(parseInt(parts[1]) + 1).padStart(2, '0');
-            const d = String(parts[2]).padStart(2, '0');
-            dateVal = `${d}/${m}/${y}`;
-          }
-        } else {
-          dateVal = row.c[5].f || row.c[5].v || '';
-        }
-      }
-
-      // row.c is an array of columns: 0=id, 1=title, 2=artist, 3=image_url, 4=category, 5=date, 6=description, 7=artist_url
-      return {
-        id: row.c[0] ? row.c[0].v : '',
-        title: row.c[1] ? row.c[1].v : 'Untitled',
-        artist: row.c[2] ? row.c[2].v : 'Unknown',
-        image: row.c[3] ? row.c[3].v : '',
-        category: row.c[4] ? row.c[4].v : 'Other',
-        date: dateVal,
-        description: row.c[6] ? row.c[6].v : '',
-        artist_url: row.c[7] ? row.c[7].v : ''
-      };
-    });
-
+    artworks = parseSheetRows(data);
     filteredArtworks = [...artworks];
 
   } catch (error) {
     console.error("Error fetching from Google Sheets:", error);
+    showFetchError();
   }
+}
+
+/* Show a user-visible error message inside the gallery grid */
+function showFetchError() {
+  galleryGrid.innerHTML = '';
+  const errorEl = document.createElement('div');
+  errorEl.className = 'gallery-error';
+  errorEl.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <h3>Couldn't load the gallery</h3>
+    <p>Something went wrong while fetching artwork data. Please check your connection and try again.</p>
+  `;
+  const retryBtn = document.createElement('button');
+  retryBtn.className = 'hero-cta';
+  retryBtn.textContent = 'Try Again';
+  retryBtn.addEventListener('click', async () => {
+    // Re-show skeletons while retrying
+    galleryGrid.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+      const skel = document.createElement('div');
+      skel.className = 'gallery-item skeleton';
+      skel.style.height = `${250 + Math.floor(Math.random() * 200)}px`;
+      galleryGrid.appendChild(skel);
+    }
+    await fetchArtworks();
+    if (artworks.length > 0) {
+      renderFilters();
+      renderGallery();
+      updateStats();
+    }
+  });
+  errorEl.appendChild(retryBtn);
+  galleryGrid.appendChild(errorEl);
 }
 
 
@@ -78,9 +131,7 @@ const navLinks = document.getElementById('navLinks');
 const themeToggle = document.getElementById('themeToggle');
 
 
-
-
-// Gallery rendering
+/* Gallery rendering */
 function renderGallery(filter = currentFilter, page = 1) {
   currentFilter = filter;
   currentPage = page;
@@ -95,22 +146,44 @@ function renderGallery(filter = currentFilter, page = 1) {
   const endIdx = startIdx + itemsPerPage;
   const paginatedArtworks = filteredArtworks.slice(startIdx, endIdx);
 
+  // Build all items into a fragment first
+  const fragment = document.createDocumentFragment();
+
   paginatedArtworks.forEach((art, i) => {
     const realIndex = startIdx + i;
     const item = document.createElement('div');
     item.className = 'gallery-item';
     item.setAttribute('data-index', realIndex);
-    item.innerHTML = `
-      <img src="${art.image}" alt="${art.title} by ${art.artist}" loading="lazy">
-      <div class="gallery-overlay">
-        <h3>${art.title}</h3>
-        <span class="artist">by ${art.artist}</span>
-        <span class="category-tag">${art.category}</span>
-      </div>
-    `;
+
+    // build card with createElement / textContent instead of innerHTML
+    const img = document.createElement('img');
+    img.src = art.image;
+    img.alt = `${art.title} by ${art.artist}`;
+    img.loading = 'lazy';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'gallery-overlay';
+
+    const h3 = document.createElement('h3');
+    h3.textContent = art.title;
+
+    const artistSpan = document.createElement('span');
+    artistSpan.className = 'artist';
+    artistSpan.textContent = `by ${art.artist}`;
+
+    const categorySpan = document.createElement('span');
+    categorySpan.className = 'category-tag';
+    categorySpan.textContent = art.category;
+
+    overlay.append(h3, artistSpan, categorySpan);
+    item.append(img, overlay);
+
     item.addEventListener('click', () => openLightbox(realIndex));
-    galleryGrid.appendChild(item);
+    fragment.appendChild(item);
   });
+
+  // Single DOM write
+  galleryGrid.appendChild(fragment);
 
   renderPagination();
 
@@ -166,11 +239,13 @@ function openLightbox(index) {
   currentIndex = index;
   updateLightboxContent();
   lightbox.classList.add('active');
+  lightbox.setAttribute('aria-hidden', 'false'); // Fix 6
   document.body.style.overflow = 'hidden';
 }
 
 function closeLightbox() {
   lightbox.classList.remove('active');
+  lightbox.setAttribute('aria-hidden', 'true'); // Fix 6
   document.body.style.overflow = '';
 }
 
@@ -250,17 +325,19 @@ window.addEventListener('scroll', () => {
   if (navLinks.classList.contains('open')) {
     navToggle.classList.remove('open');
     navLinks.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false'); // Fix 6
     document.body.style.overflow = '';
     navbar.classList.remove('menu-open');
   }
 }, { passive: true });
 
 
-// Mobile Menu Toggle
+// Mobile Menu Toggle (Fix 6 — aria-expanded)
 navToggle.addEventListener('click', () => {
   navToggle.classList.toggle('open');
   navLinks.classList.toggle('open');
   const isOpen = navLinks.classList.contains('open');
+  navToggle.setAttribute('aria-expanded', String(isOpen)); // Fix 6
   document.body.style.overflow = isOpen ? 'hidden' : '';
   navbar.classList.toggle('menu-open', isOpen);
 });
@@ -270,6 +347,7 @@ navLinks.querySelectorAll('a').forEach(link => {
   link.addEventListener('click', () => {
     navToggle.classList.remove('open');
     navLinks.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false'); // Fix 6
     document.body.style.overflow = '';
     navbar.classList.remove('menu-open');
   });
@@ -309,6 +387,10 @@ function initTheme() {
     document.documentElement.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
   }
 
+  // Set initial aria-pressed state
+  const isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  themeToggle.setAttribute('aria-pressed', String(isDark));
+
   themeToggle.addEventListener('click', () => {
     // Add transition class for smooth animation
     document.body.classList.add('theme-transition');
@@ -317,6 +399,9 @@ function initTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+
+    // Update aria-pressed
+    themeToggle.setAttribute('aria-pressed', String(newTheme === 'dark'));
 
     // Remove transition class after animation completes
     setTimeout(() => {
@@ -364,6 +449,10 @@ async function init() {
   initTheme();
   setupScrollAnimations();
 
+  // set initial ARIA states
+  navToggle.setAttribute('aria-expanded', 'false');
+  lightbox.setAttribute('aria-hidden', 'true');
+
   await fetchArtworks();
 
   renderFilters();
@@ -374,7 +463,7 @@ async function init() {
   setInterval(pollForUpdates, 30000);
 }
 
-// Background poll — only re-renders if data changed
+// Background poll only re-renders if data changed
 let pollCount = 0;
 async function pollForUpdates() {
   pollCount++;
@@ -391,33 +480,8 @@ async function pollForUpdates() {
     const jsonString = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
     const data = JSON.parse(jsonString);
 
-    const newArtworks = data.table.rows.map(row => {
-      let dateVal = '';
-      if (row.c[5]) {
-        const rawDate = row.c[5].v;
-        if (typeof rawDate === 'string' && rawDate.startsWith('Date(')) {
-          const parts = rawDate.replace('Date(', '').replace(')', '').split(',');
-          if (parts.length >= 3) {
-            const y = parts[0];
-            const m = String(parseInt(parts[1]) + 1).padStart(2, '0');
-            const d = String(parts[2]).padStart(2, '0');
-            dateVal = `${d}/${m}/${y}`;
-          }
-        } else {
-          dateVal = row.c[5].f || row.c[5].v || '';
-        }
-      }
-      return {
-        id: row.c[0] ? row.c[0].v : '',
-        title: row.c[1] ? row.c[1].v : 'Untitled',
-        artist: row.c[2] ? row.c[2].v : 'Unknown',
-        image: row.c[3] ? row.c[3].v : '',
-        category: row.c[4] ? row.c[4].v : 'Other',
-        date: dateVal,
-        description: row.c[6] ? row.c[6].v : '',
-        artist_url: row.c[7] ? row.c[7].v : ''
-      };
-    });
+    // reuse shared parser
+    const newArtworks = parseSheetRows(data);
 
     console.log(`[Poll #${pollCount}] Fetched ${newArtworks.length} rows from sheet`);
 

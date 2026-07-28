@@ -1,13 +1,11 @@
-/* User prevention */
-* {
+/* Image protection — scoped to gallery & lightbox images only (Fix 4) */
+.gallery-item img,
+.lightbox-image-wrapper img {
   user-select: none;
   -webkit-user-select: none;
-  -ms-user-select: none;
-  -moz-user-select: none;
-  -khtml-user-select: none;
   -webkit-user-drag: none;
-  -khtml-user-drag: none;
   -webkit-touch-callout: none;
+  pointer-events: auto;
 }
 
 :root {
@@ -1119,6 +1117,43 @@ img {
 
 .stagger-children .fade-in:nth-child(6) {
   transition-delay: 0.3s;
+}
+
+/* Gallery error state (Fix 3) */
+.gallery-error {
+  grid-column: 1 / -1;
+  column-span: all;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-2xl) var(--gap-lg);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.gallery-error svg {
+  color: var(--text-muted);
+  opacity: 0.6;
+  margin-bottom: var(--gap-xs);
+}
+
+.gallery-error h3 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.gallery-error p {
+  font-size: 0.95rem;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.gallery-error .hero-cta {
+  margin-top: var(--gap-sm);
 }
 
 /* Responsive */
